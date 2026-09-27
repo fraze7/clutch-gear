@@ -27,17 +27,21 @@ user accounts, payments, an admin area, and automated checks on every push.
 - The cart lives in the browser (localStorage), but checkout re-reads every price from the
   database on the server — the browser is never trusted with prices
 - Orders are only marked paid by Stripe's webhook, not by the "thanks" page the buyer lands on
-- Made-up brand and products only — no real brand names or product photos
+- Made-up brand and products only — no real brand names or product photos. Product images are SVG
+  illustrations drawn by `scripts/generate-product-art.ts` (`npm run art`)
+- Next.js Cache Components: product reads use 'use cache' + cacheTag("products"), so admin edits
+  can refresh them with revalidateTag("products"). The catalogue reads searchParams inside <Suspense>
+- Search and sort use a plain GET form (next/form), so they work without JavaScript
 
 ## Build Order
 1. ✅ Project scaffold (Next.js + TypeScript + Tailwind)
 2. ✅ Database: Prisma schema, Neon connection, seed script with 25 products
-3. Catalogue: home page, product list with category filter/search/sort, product pages
+3. ✅ Catalogue: home page, product list with category filter/search/sort, product pages
 4. Cart: add/remove/change quantity, persisted in localStorage, cart page
 5. Checkout: Stripe Checkout session, webhook creates the paid order, success page
 6. Accounts: sign in with GitHub, order history page
 7. Admin: product create/edit/delete, orders list (admin role only)
-8. Tests + GitHub Actions (lint, tests, build) — added alongside each step, finished here
+8. Tests + GitHub Actions — started in step 3 (CI runs lint, typecheck, tests); added alongside each step
 9. Deploy to Vercel, README with screenshots
 
 ## Stretch Goals (after it's finished)
@@ -60,4 +64,7 @@ user accounts, payments, an admin area, and automated checks on every push.
   `src/generated/prisma` (gitignored, rebuilt by `postinstall`). Migrations use `DATABASE_URL` (direct),
   the app uses `DATABASE_URL_POOLED` via `src/lib/db.ts`
 - `npm run db:migrate` / `db:seed` / `db:studio`; the seed upserts by slug so it can be re-run
+- CI doesn't run `next build`: it prerenders from the database, so the build runs on Vercel (which has the secrets)
+- Testing in the in-app browser: when the pane is hidden, animation frames pause, so streamed <Suspense>
+  content isn't revealed/hydrated until a screenshot or real interaction. Not a bug in the site
 - Secrets go in `.env.local` (gitignored) locally and in Vercel's environment variables when deployed

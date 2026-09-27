@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-label="Lowsens Air">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="45%" r="70%">
+      <stop offset="0" stop-color="#1b2030"/><stop offset="1" stop-color="#0b0d12"/>
+    </radialGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#fb923c" stop-opacity="0.35"/><stop offset="1" stop-color="#fb923c" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2d3444"/><stop offset="1" stop-color="#1f2430"/>
+    </linearGradient>
+    <linearGradient id="pad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#171b25"/><stop offset="1" stop-color="#232938"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2a3346"/><stop offset="0.5" stop-color="#1a2030"/><stop offset="1" stop-color="#303a50"/>
+    </linearGradient>
+    <pattern id="grip" width="10" height="10" patternUnits="userSpaceOnUse">
+      <rect width="10" height="10" fill="#1f2430"/><circle cx="5" cy="5" r="2" fill="#2d3444"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="800" fill="url(#bg)"/>
+  <ellipse cx="400" cy="430" rx="340" ry="300" fill="url(#glow)"/>
+  <ellipse cx="400" cy="700" rx="260" ry="28" fill="#000000" opacity="0.35"/>
+  
+  <g transform="translate(400 410) scale(1.08) translate(-400 -410)">
+    
+    <path d="M400,190 C500,190 530,260 530,340 L530,520 C530,600 480,630 400,630 C320,630 270,600 270,520 L270,340 C270,260 300,190 400,190 Z" fill="url(#body)" stroke="#3b4356" stroke-width="4"/>
+    <path d="M272,362 Q400,392 528,362" stroke="#3b4356" stroke-width="4" fill="none"/>
+    <line x1="400" y1="194" x2="400" y2="372" stroke="#3b4356" stroke-width="4"/>
+    <rect x="388" y="250" width="24" height="64" rx="12" fill="#fb923c"/>
+    <path d="M278,420 C272,470 274,520 290,560" stroke="#fb923c" stroke-width="8" fill="none" stroke-linecap="round" opacity="0.9"/>
+    <path d="M522,420 C528,470 526,520 510,560" stroke="#fb923c" stroke-width="8" fill="none" stroke-linecap="round" opacity="0.9"/>
+    <text x="400" y="560" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="30" fill="#fb923c" opacity="0.85">C</text>
+    <ellipse cx="360" cy="300" rx="50" ry="90" fill="#ffffff" opacity="0.05"/>
+  </g>
+</svg>
