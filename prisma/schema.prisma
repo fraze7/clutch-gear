@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Category {
+  MICE
+  KEYBOARDS
+  HEADSETS
+  MOUSEPADS
+  ACCESSORIES
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  tagline     String
+  description String
+  category    Category
+  priceCents  Int
+  stock       Int      @default(0)
+  imageUrl    String
+  featured    Boolean  @default(false)
+  // Category-specific details shown on the product page, e.g. { "Weight": "58 g", "Sensor": "..." }
+  specs       Json     @default("{}")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+}

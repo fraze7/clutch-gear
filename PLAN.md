@@ -16,14 +16,14 @@ user accounts, payments, an admin area, and automated checks on every push.
 
 ## Data Model
 - **User** — from Auth.js; `role` = customer | admin
-- **Product** — slug, name, description, category, price (cents), stock, image, featured
-- **Category** — mice, keyboards, headsets, mousepads, accessories
+- **Product** — slug, name, tagline, description, category, price (pence), stock, image, featured, specs (JSON)
+- **Category** — enum: mice, keyboards, headsets, mousepads, accessories
 - **Order** — user, status (pending → paid), total (cents), Stripe checkout session id
 - **OrderItem** — product, quantity, and a copy of the name and price at time of purchase
   (so old orders don't change if a product is edited later)
 
 ## Key Decisions
-- Prices are stored in cents (integers), never floats
+- Prices are in GBP, stored in pence (integers), never floats
 - The cart lives in the browser (localStorage), but checkout re-reads every price from the
   database on the server — the browser is never trusted with prices
 - Orders are only marked paid by Stripe's webhook, not by the "thanks" page the buyer lands on
@@ -31,7 +31,7 @@ user accounts, payments, an admin area, and automated checks on every push.
 
 ## Build Order
 1. ✅ Project scaffold (Next.js + TypeScript + Tailwind)
-2. Database: Prisma schema, Neon connection, seed script with ~25 products
+2. ✅ Database: Prisma schema, Neon connection, seed script with 25 products
 3. Catalogue: home page, product list with category filter/search/sort, product pages
 4. Cart: add/remove/change quantity, persisted in localStorage, cart page
 5. Checkout: Stripe Checkout session, webhook creates the paid order, success page
@@ -56,4 +56,8 @@ user accounts, payments, an admin area, and automated checks on every push.
 ## Key Notes
 - Next.js 16 has breaking changes vs older versions: check `node_modules/next/dist/docs/`
   rather than relying on memory
+- Prisma 7: config in `prisma.config.ts` (loads `.env.local` itself), client generated into
+  `src/generated/prisma` (gitignored, rebuilt by `postinstall`). Migrations use `DATABASE_URL` (direct),
+  the app uses `DATABASE_URL_POOLED` via `src/lib/db.ts`
+- `npm run db:migrate` / `db:seed` / `db:studio`; the seed upserts by slug so it can be re-run
 - Secrets go in `.env.local` (gitignored) locally and in Vercel's environment variables when deployed
