@@ -18,7 +18,7 @@ user accounts, payments, an admin area, and automated checks on every push.
 - **User** — from Auth.js; `role` = customer | admin
 - **Product** — slug, name, tagline, description, category, price (pence), stock, image, featured, specs (JSON)
 - **Category** — enum: mice, keyboards, headsets, mousepads, accessories
-- **Order** — user, status (pending → paid), total (cents), Stripe checkout session id
+- **Order** — user, status (pending → paid), total (pence), Stripe checkout session id
 - **OrderItem** — product, quantity, and a copy of the name and price at time of purchase
   (so old orders don't change if a product is edited later)
 
