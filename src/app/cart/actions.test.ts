@@ -48,13 +48,14 @@ describe("addToCartAction", () => {
   });
 
   it("rejects invalid input without touching the cart", async () => {
-    for (const fields of [
+    const invalid: Record<string, string>[] = [
       { slug: "recoil-mini", quantity: "0" },
       { slug: "recoil-mini", quantity: "11" },
       { slug: "recoil-mini", quantity: "abc" },
       { slug: "../../etc", quantity: "1" },
       { quantity: "1" },
-    ]) {
+    ];
+    for (const fields of invalid) {
       expect((await addToCartAction(idle, form(fields))).status).toBe("error");
     }
     expect(jar.has(CART_COOKIE)).toBe(false);
