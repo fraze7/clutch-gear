@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-label="Memory Foam Wrist Rest">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="45%" r="70%">
+      <stop offset="0" stop-color="#1b2030"/><stop offset="1" stop-color="#0b0d12"/>
+    </radialGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#a78bfa" stop-opacity="0.35"/><stop offset="1" stop-color="#a78bfa" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2d3444"/><stop offset="1" stop-color="#1f2430"/>
+    </linearGradient>
+    <linearGradient id="pad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#171b25"/><stop offset="1" stop-color="#232938"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2a3346"/><stop offset="0.5" stop-color="#1a2030"/><stop offset="1" stop-color="#303a50"/>
+    </linearGradient>
+    <pattern id="grip" width="10" height="10" patternUnits="userSpaceOnUse">
+      <rect width="10" height="10" fill="#1f2430"/><circle cx="5" cy="5" r="2" fill="#2d3444"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="800" fill="url(#bg)"/>
+  <ellipse cx="400" cy="430" rx="340" ry="300" fill="url(#glow)"/>
+  <ellipse cx="400" cy="700" rx="260" ry="28" fill="#000000" opacity="0.35"/>
+  
+    <rect x="110" y="340" width="580" height="150" rx="75" fill="url(#body)" stroke="#3b4356" stroke-width="4"/>
+    <rect x="126" y="356" width="548" height="118" rx="59" fill="none" stroke="#a78bfa" stroke-width="3" stroke-dasharray="10 8"/>
+    <ellipse cx="330" cy="385" rx="160" ry="18" fill="#ffffff" opacity="0.05"/>
+</svg>
