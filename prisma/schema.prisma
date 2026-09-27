@@ -30,6 +30,48 @@ model Product {
   specs       Json     @default("{}")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  orderItems  OrderItem[]
 
   @@index([category])
+}
+
+enum OrderStatus {
+  PENDING // created at checkout, waiting for Stripe
+  PAID // confirmed by Stripe (webhook or the return page)
+  EXPIRED // the Stripe checkout session expired without payment
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  status          OrderStatus @default(PENDING)
+  stripeSessionId String?     @unique
+  email           String?
+  shippingName    String?
+  // The address as Stripe collected it: { line1, line2, city, postal_code, country }
+  shippingAddress Json?
+  subtotalCents   Int
+  shippingCents   Int
+  totalCents      Int
+  currency        String      @default("gbp")
+  createdAt       DateTime    @default(now())
+  paidAt          DateTime?
+  items           OrderItem[]
+
+  @@index([status])
+}
+
+// A copy of each product's name and price at the time of purchase, so editing or deleting
+// a product later never changes an existing order
+model OrderItem {
+  id             String   @id @default(cuid())
+  orderId        String
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId      String?
+  product        Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productSlug    String
+  productName    String
+  unitPriceCents Int
+  quantity       Int
+
+  @@index([orderId])
 }
