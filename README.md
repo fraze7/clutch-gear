@@ -8,7 +8,7 @@ A full-stack e-commerce store for a made-up gaming gear brand — a portfolio pr
 
 ## Stack
 
-Next.js 16 (App Router, Cache Components) · TypeScript · Tailwind CSS · PostgreSQL on Neon · Prisma 7 · Vitest · GitHub Actions
+Next.js 16 (App Router, Cache Components) · TypeScript · Tailwind CSS · PostgreSQL on Neon · Prisma 7 · Stripe Checkout · Vitest · GitHub Actions
 
 ## Running locally
 
@@ -16,12 +16,18 @@ Next.js 16 (App Router, Cache Components) · TypeScript · Tailwind CSS · Postg
 npm install
 ```
 
-Create `.env.local` with your Neon connection strings:
+Create `.env.local`:
 
 ```
-DATABASE_URL="postgresql://..."          # direct connection, used for migrations
-DATABASE_URL_POOLED="postgresql://..."   # pooled connection, used by the app
+DATABASE_URL="postgresql://..."          # Neon direct connection, used for migrations
+DATABASE_URL_POOLED="postgresql://..."   # Neon pooled connection, used by the app
+STRIPE_SECRET_KEY="sk_test_..."          # Stripe test mode only — live keys are refused
+STRIPE_WEBHOOK_SECRET="whsec_..."        # optional locally; required in production
 ```
+
+Locally, orders are confirmed by the checkout return page, so the webhook secret is optional. To test the
+webhook itself, use the [Stripe CLI](https://docs.stripe.com/stripe-cli): `stripe listen --forward-to localhost:3000/api/stripe/webhook`.
+Pay with Stripe's test card `4242 4242 4242 4242`, any future expiry and any CVC.
 
 Then create the tables, add the products and start the dev server:
 

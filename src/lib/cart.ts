@@ -89,8 +89,8 @@ export type CartProduct = {
   imageUrl: string;
 };
 
-export type CartLine = {
-  product: CartProduct;
+export type CartLine<P extends CartProduct = CartProduct> = {
+  product: P;
   quantity: number;
   lineTotalCents: number;
   // "reduced": fewer in stock than were in the cart; "out-of-stock": can't be bought right now
@@ -99,9 +99,10 @@ export type CartLine = {
 
 // Combines the cart with current product data. Lines for products that no longer exist are dropped,
 // and out-of-stock lines don't count towards the total.
-export function summarizeCart(items: CartItem[], products: CartProduct[]) {
+// Generic so callers keep any extra product fields (e.g. checkout needs the product id)
+export function summarizeCart<P extends CartProduct>(items: CartItem[], products: P[]) {
   const bySlug = new Map(products.map((p) => [p.slug, p]));
-  const lines: CartLine[] = [];
+  const lines: CartLine<P>[] = [];
   const missing: string[] = [];
 
   for (const item of items) {

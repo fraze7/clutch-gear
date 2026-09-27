@@ -2,9 +2,22 @@
 
 // Server Actions are public endpoints — anyone can POST to them directly — so every input is validated
 // here and stock is read fresh from the database rather than trusted from the page.
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCart, saveCart } from "@/lib/cart-cookie";
-import { addToCart, isValidQuantity, isValidSlug, lineLimit, removeFromCart, setQuantity } from "@/lib/cart";
+import {
+  addToCart,
+  isValidQuantity,
+  isValidSlug,
+  lineLimit,
+  removeFromCart,
+  setQuantity,
+  summarizeCart,
+} from "@/lib/cart";
+import { buildCheckoutSessionParams, purchasableLines } from "@/lib/checkout";
+import { createPendingOrder } from "@/lib/orders";
+import { getStripe } from "@/lib/stripe";
 
 export type AddToCartState =
   | { status: "idle" }
@@ -53,4 +66,44 @@ export async function removeFromCartAction(formData: FormData) {
   const slug = formData.get("slug");
   if (!isValidSlug(slug)) return;
   await saveCart(removeFromCart(await getCart(), slug));
+}
+
+// Where Stripe sends the buyer back to. SITE_URL wins when set; otherwise the site the request came from.
+async function siteOrigin() {
+  if (process.env.SITE_URL) return process.env.SITE_URL.replace(/\/$/, "");
+  const h = await headers();
+  return h.get("origin") ?? `https://${h.get("host")}`;
+}
+
+// Re-prices the cart from the database, saves a PENDING order, then sends the buyer to Stripe's hosted
+// checkout page. Nothing is charged here — the order only becomes PAID once Stripe confirms payment.
+export async function checkoutAction() {
+  const items = await getCart();
+  const products = items.length
+    ? await db.product.findMany({
+        where: { slug: { in: items.map((i) => i.slug) } },
+        select: { id: true, slug: true, name: true, priceCents: true, stock: true, imageUrl: true },
+      })
+    : [];
+  const summary = summarizeCart(items, products);
+  const lines = purchasableLines(summary.lines);
+  if (lines.length === 0) redirect("/cart");
+
+  const order = await createPendingOrder({
+    lines,
+    subtotalCents: summary.subtotalCents,
+    shippingCents: summary.shippingCents,
+  });
+  const session = await getStripe().checkout.sessions.create(
+    buildCheckoutSessionParams({
+      orderId: order.id,
+      lines,
+      shippingCents: summary.shippingCents,
+      origin: await siteOrigin(),
+    })
+  );
+  await db.order.update({ where: { id: order.id }, data: { stripeSessionId: session.id } });
+
+  if (!session.url) throw new Error("Stripe didn't return a checkout URL");
+  redirect(session.url);
 }

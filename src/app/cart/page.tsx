@@ -6,23 +6,24 @@ import { getCart } from "@/lib/cart-cookie";
 import { FREE_SHIPPING_THRESHOLD_CENTS, lineLimit, summarizeCart, type CartLine } from "@/lib/cart";
 import { formatPrice } from "@/lib/catalog";
 import { getCartProducts } from "@/lib/products";
-import { removeFromCartAction, updateQuantityAction } from "./actions";
+import { checkoutAction, removeFromCartAction, updateQuantityAction } from "./actions";
 import { PendingButton } from "@/components/pending-button";
 
 export const metadata: Metadata = { title: "Cart", robots: { index: false } };
 
-export default function CartPage() {
+export default function CartPage({ searchParams }: PageProps<"/cart">) {
   return (
     <div className="space-y-8">
       <h1 className="text-3xl font-bold">Your cart</h1>
       <Suspense fallback={<div className="h-64 animate-pulse rounded-xl border border-line bg-surface" />}>
-        <CartContents />
+        <CartContents searchParams={searchParams} />
       </Suspense>
     </div>
   );
 }
 
-async function CartContents() {
+async function CartContents({ searchParams }: { searchParams: PageProps<"/cart">["searchParams"] }) {
+  const cancelled = (await searchParams).checkout === "cancelled";
   const items = await getCart();
   const products = items.length ? await getCartProducts(items.map((i) => i.slug).sort()) : [];
   const cart = summarizeCart(items, products);
@@ -46,6 +47,11 @@ async function CartContents() {
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_20rem]">
       <div className="space-y-4">
+        {cancelled && (
+          <p className="rounded-lg border border-line bg-surface-2 px-4 py-2 text-sm text-muted">
+            Checkout cancelled — you haven&apos;t been charged. Your cart is still here.
+          </p>
+        )}
         {cart.missing.length > 0 && (
           <p className="rounded-lg border border-warn/40 bg-warn/10 px-4 py-2 text-sm text-warn">
             {cart.missing.length === 1 ? "An item" : "Some items"} in your cart are no longer available and
@@ -80,14 +86,17 @@ async function CartContents() {
         {toFreeShipping > 0 && cart.subtotalCents > 0 && (
           <p className="text-xs text-muted">Add {formatPrice(toFreeShipping)} more for free delivery.</p>
         )}
-        <button
-          type="button"
-          disabled
-          className="w-full rounded-lg bg-accent px-5 py-3 font-semibold text-accent-ink opacity-50"
-          title="Checkout arrives in the next update"
-        >
-          Checkout — coming soon
-        </button>
+        <form action={checkoutAction}>
+          <PendingButton
+            disabled={cart.itemCount === 0}
+            className="w-full rounded-lg bg-accent px-5 py-3 font-semibold text-accent-ink hover:brightness-110"
+          >
+            Checkout
+          </PendingButton>
+        </form>
+        <p className="text-center text-xs text-muted">
+          Secure test checkout by Stripe. Use card 4242 4242 4242 4242 — no real payment is taken.
+        </p>
         <Link href="/products" className="block text-center text-sm text-accent hover:underline">
           Continue shopping
         </Link>

@@ -18,7 +18,7 @@ user accounts, payments, an admin area, and automated checks on every push.
 - **User** — from Auth.js; `role` = customer | admin
 - **Product** — slug, name, tagline, description, category, price (pence), stock, image, featured, specs (JSON)
 - **Category** — enum: mice, keyboards, headsets, mousepads, accessories
-- **Order** — user, status (pending → paid), total (pence), Stripe checkout session id
+- **Order** — status (PENDING → PAID, or EXPIRED), totals (pence), Stripe session id, email, shipping name/address. User link comes in step 6
 - **OrderItem** — product, quantity, and a copy of the name and price at time of purchase
   (so old orders don't change if a product is edited later)
 
@@ -29,6 +29,14 @@ user accounts, payments, an admin area, and automated checks on every push.
   JavaScript, and checkout can build the order server-side. Prices always come from the database
 - Server Actions are public endpoints: every action validates its input and reads stock fresh from the DB
 - UK delivery £4.99, free over £50
+- Checkout flow: the Server Action re-prices the cart from the DB, saves a PENDING order (with copies of
+  names/prices), then redirects to Stripe. The webhook (signature-verified) and the return page (which
+  re-fetches the session from Stripe) both call one idempotent fulfil function: it checks the session id,
+  amount and currency match the order, then marks it PAID and decrements stock in one transaction
+  (never below 0). Stripe may retry webhooks, so fulfilling twice is a no-op
+- The Stripe client refuses to start with a live key — this demo can never take real money
+- Unknown order ids render the not-found page but with status 200 (the page is already streaming by then);
+  harmless for a private, noindex page
 - Orders are only marked paid by Stripe's webhook, not by the "thanks" page the buyer lands on
 - Made-up brand and products only — no real brand names or product photos. Product images are SVG
   illustrations drawn by `scripts/generate-product-art.ts` (`npm run art`)
@@ -41,7 +49,7 @@ user accounts, payments, an admin area, and automated checks on every push.
 2. ✅ Database: Prisma schema, Neon connection, seed script with 25 products
 3. ✅ Catalogue: home page, product list with category filter/search/sort, product pages
 4. ✅ Cart: add/remove/change quantity, stored in a cookie, cart page with delivery and stock checks
-5. Checkout: Stripe Checkout session, webhook creates the paid order, success page
+5. ✅ Checkout: Stripe Checkout (hosted page), signed webhook marks orders paid and takes stock, order page
 6. Accounts: sign in with GitHub, order history page
 7. Admin: product create/edit/delete, orders list (admin role only)
 8. Tests + GitHub Actions — started in step 3 (CI runs lint, typecheck, tests); added alongside each step
@@ -67,6 +75,10 @@ user accounts, payments, an admin area, and automated checks on every push.
   `src/generated/prisma` (gitignored, rebuilt by `postinstall`). Migrations use `DATABASE_URL` (direct),
   the app uses `DATABASE_URL_POOLED` via `src/lib/db.ts`
 - `npm run db:migrate` / `db:seed` / `db:studio`; the seed upserts by slug so it can be re-run
+- Migrations are applied by hand with `npm run db:migrate` (local and production share one Neon DB for now);
+  a separate production branch in Neon would be worth adding before real traffic
+- Env vars: DATABASE_URL, DATABASE_URL_POOLED, STRIPE_SECRET_KEY (sk_test_ only), STRIPE_WEBHOOK_SECRET
+  (from the Stripe webhook endpoint), optional SITE_URL (defaults to the request's origin)
 - CI doesn't run `next build`: it prerenders from the database, so the build runs on Vercel (which has the secrets)
 - Testing in the in-app browser: when the pane is hidden, animation frames pause, so streamed <Suspense>
   content isn't revealed/hydrated until a screenshot or real interaction. Not a bug in the site
