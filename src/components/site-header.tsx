@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { CATEGORIES, catalogHref } from "@/lib/catalog";
+import { CartLink, CartLinkView } from "@/components/cart-link";
 
 export function SiteHeader() {
   return (
@@ -18,6 +20,10 @@ export function SiteHeader() {
             </Link>
           ))}
         </nav>
+        {/* The count comes from the cart cookie, so it streams in; the rest of the header stays static */}
+        <Suspense fallback={<CartLinkView />}>
+          <CartLink />
+        </Suspense>
       </div>
     </header>
   );

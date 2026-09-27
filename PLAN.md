@@ -24,8 +24,11 @@ user accounts, payments, an admin area, and automated checks on every push.
 
 ## Key Decisions
 - Prices are in GBP, stored in pence (integers), never floats
-- The cart lives in the browser (localStorage), but checkout re-reads every price from the
-  database on the server — the browser is never trusted with prices
+- The cart lives in an httpOnly cookie holding only slugs and quantities (changed from localStorage in
+  step 4): the server can read it, so the cart page shows live prices/stock, the buttons work without
+  JavaScript, and checkout can build the order server-side. Prices always come from the database
+- Server Actions are public endpoints: every action validates its input and reads stock fresh from the DB
+- UK delivery £4.99, free over £50
 - Orders are only marked paid by Stripe's webhook, not by the "thanks" page the buyer lands on
 - Made-up brand and products only — no real brand names or product photos. Product images are SVG
   illustrations drawn by `scripts/generate-product-art.ts` (`npm run art`)
@@ -37,7 +40,7 @@ user accounts, payments, an admin area, and automated checks on every push.
 1. ✅ Project scaffold (Next.js + TypeScript + Tailwind)
 2. ✅ Database: Prisma schema, Neon connection, seed script with 25 products
 3. ✅ Catalogue: home page, product list with category filter/search/sort, product pages
-4. Cart: add/remove/change quantity, persisted in localStorage, cart page
+4. ✅ Cart: add/remove/change quantity, stored in a cookie, cart page with delivery and stock checks
 5. Checkout: Stripe Checkout session, webhook creates the paid order, success page
 6. Accounts: sign in with GitHub, order history page
 7. Admin: product create/edit/delete, orders list (admin role only)

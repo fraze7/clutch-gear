@@ -49,6 +49,17 @@ export async function getRelatedProducts(category: Category, excludeSlug: string
   });
 }
 
+// For the cart: the current price and stock of each product in it
+export async function getCartProducts(slugs: string[]) {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag("products");
+  return db.product.findMany({
+    where: { slug: { in: slugs } },
+    select: { slug: true, name: true, priceCents: true, stock: true, imageUrl: true },
+  });
+}
+
 export async function getAllProductSlugs() {
   "use cache";
   cacheLife("hours");

@@ -6,6 +6,7 @@ import { catalogHref, categoryLabel, formatPrice } from "@/lib/catalog";
 import { getAllProductSlugs, getProductBySlug, getRelatedProducts } from "@/lib/products";
 import { ProductGrid } from "@/components/product-card";
 import { StockBadge } from "@/components/stock-badge";
+import { AddToCart } from "@/components/add-to-cart";
 
 // Every product page is prerendered at build time
 export async function generateStaticParams() {
@@ -59,6 +60,7 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
             <span className="text-3xl font-semibold">{formatPrice(product.priceCents)}</span>
             <StockBadge stock={product.stock} />
           </div>
+          <AddToCart slug={product.slug} stock={product.stock} />
           <p className="leading-relaxed text-muted">{product.description}</p>
           {specs.length > 0 && (
             <div>
