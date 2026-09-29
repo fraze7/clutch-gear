@@ -41,6 +41,17 @@ npm run db:seed
 npm run dev
 ```
 
+## Admin
+
+Sign in once, then make yourself an admin from a terminal (the site deliberately can't change roles):
+
+```bash
+npm run set-role -- you@example.com admin
+```
+
+The **Admin** link then appears in the header: an overview, product management (create, edit, delete)
+and all orders. Everyone else gets a 404 for `/admin`.
+
 ## Scripts
 
 | Script | What it does |
@@ -52,3 +63,4 @@ npm run dev
 | `npm run db:seed` | Add or update the 25 demo products (safe to re-run) |
 | `npm run db:studio` | Browse the database |
 | `npm run art` | Regenerate the SVG product illustrations |
+| `npm run set-role -- <email> <customer|admin>` | Change a user's role |

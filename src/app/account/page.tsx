@@ -63,7 +63,7 @@ async function Account() {
                       {order.items.map((i) => (i.quantity > 1 ? `${i.quantity} × ${i.productName}` : i.productName)).join(", ")}
                     </p>
                     <p className="text-sm text-muted">
-                      {order.createdAt.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                      {order.createdAt.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "Europe/London" })}
                       {" · "}
                       <span className={STATUS_TONE[order.status]}>{STATUS_LABEL[order.status]}</span>
                     </p>
