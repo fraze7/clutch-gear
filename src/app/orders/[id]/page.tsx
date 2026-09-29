@@ -40,7 +40,7 @@ async function OrderDetails({ params }: { params: PageProps<"/orders/[id]">["par
         <h1 className="text-3xl font-bold">{status.title}</h1>
         <p className="text-muted">
           Order <span className="font-mono text-ink">{order.id}</span> · placed{" "}
-          {order.createdAt.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
+          {order.createdAt.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/London" })}
         </p>
         {order.status === "PAID" && order.email && (
           <p className="text-sm text-muted">

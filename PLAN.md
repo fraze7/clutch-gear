@@ -36,6 +36,11 @@ user accounts, payments, an admin area, and automated checks on every push.
   amount and currency match the order, then marks it PAID and decrements stock in one transaction
   (never below 0). Stripe may retry webhooks, so fulfilling twice is a no-op
 - The Stripe client refuses to start with a live key — this demo can never take real money
+- Admin: every admin page and every admin Server Action checks the role itself (src/lib/admin.ts) —
+  no layout-only check, since layouts don't re-run on navigation or protect actions. Non-admins get
+  the normal 404, so the admin area doesn't reveal it exists. Admins are made with `npm run set-role`
+  (the site has no way to change roles). Saves call updateTag("products") so the shop updates at once.
+  Deleting a product is safe: orders keep their own copy of names and prices
 - Accounts: guest checkout stays; signed-in checkouts are linked to the user (email pre-filled on Stripe).
   Orders placed while signed in are only viewable by that user; guest orders by their unguessable id.
   `role` has input: false in Better Auth, so users can never make themselves admin. Sign-in/out are
@@ -56,7 +61,7 @@ user accounts, payments, an admin area, and automated checks on every push.
 4. ✅ Cart: add/remove/change quantity, stored in a cookie, cart page with delivery and stock checks
 5. ✅ Checkout: Stripe Checkout (hosted page), signed webhook marks orders paid and takes stock, order page
 6. ✅ Accounts: sign in with GitHub (Better Auth), account page with order history, private orders
-7. Admin: product create/edit/delete, orders list (admin role only)
+7. ✅ Admin: overview stats, product create/edit/delete with validation, orders list with status filter (admin role only)
 8. Tests + GitHub Actions — started in step 3 (CI runs lint, typecheck, tests); added alongside each step
 9. Deploy to Vercel, README with screenshots
 
