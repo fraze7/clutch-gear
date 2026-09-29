@@ -7,7 +7,7 @@ export function CartLinkView({ count }: { count?: number }) {
   return (
     <Link
       href="/cart"
-      className="ml-auto flex items-center gap-2 rounded-lg border border-line px-3 py-1.5 text-sm hover:border-accent/60"
+      className="flex items-center gap-2 rounded-lg border border-line px-3 py-1.5 text-sm hover:border-accent/60"
       aria-label={count === undefined ? "Cart" : `Cart, ${count} ${count === 1 ? "item" : "items"}`}
     >
       Cart

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { CATEGORIES, catalogHref } from "@/lib/catalog";
 import { CartLink, CartLinkView } from "@/components/cart-link";
+import { AccountLink, SignInLink } from "@/components/account-link";
 
 export function SiteHeader() {
   return (
@@ -20,10 +21,15 @@ export function SiteHeader() {
             </Link>
           ))}
         </nav>
-        {/* The count comes from the cart cookie, so it streams in; the rest of the header stays static */}
-        <Suspense fallback={<CartLinkView />}>
-          <CartLink />
-        </Suspense>
+        {/* These read cookies, so they stream in; the rest of the header stays static */}
+        <div className="ml-auto flex items-center gap-2">
+          <Suspense fallback={<SignInLink />}>
+            <AccountLink />
+          </Suspense>
+          <Suspense fallback={<CartLinkView />}>
+            <CartLink />
+          </Suspense>
+        </div>
       </div>
     </header>
   );

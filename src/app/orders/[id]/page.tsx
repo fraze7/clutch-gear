@@ -3,12 +3,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { formatPrice } from "@/lib/catalog";
-import { getOrder } from "@/lib/orders";
+import { canViewOrder, getOrder } from "@/lib/orders";
+import { getSession } from "@/lib/session";
 
 export const metadata: Metadata = { title: "Your order", robots: { index: false } };
 
 // Guest orders are found by their id, which is long and random (a cuid), so it can't be guessed.
-// Step 6 adds accounts, so signed-in buyers will see their orders in an order history too.
+// Orders placed while signed in are only visible to that account.
 export default function OrderPage({ params }: PageProps<"/orders/[id]">) {
   return (
     <Suspense fallback={<div className="h-96 animate-pulse rounded-xl border border-line bg-surface" />}>
@@ -27,6 +28,7 @@ async function OrderDetails({ params }: { params: PageProps<"/orders/[id]">["par
   const { id } = await params;
   const order = /^[a-z0-9]{20,40}$/.test(id) ? await getOrder(id) : null;
   if (!order) notFound();
+  if (order.userId && !canViewOrder(order, (await getSession())?.user.id)) notFound();
 
   const status = STATUS[order.status];
   const address = order.shippingAddress as Record<string, string | null> | null;

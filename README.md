@@ -8,7 +8,7 @@ A full-stack e-commerce store for a made-up gaming gear brand — a portfolio pr
 
 ## Stack
 
-Next.js 16 (App Router, Cache Components) · TypeScript · Tailwind CSS · PostgreSQL on Neon · Prisma 7 · Stripe Checkout · Vitest · GitHub Actions
+Next.js 16 (App Router, Cache Components) · TypeScript · Tailwind CSS · PostgreSQL on Neon · Prisma 7 · Stripe Checkout · Better Auth · Vitest · GitHub Actions
 
 ## Running locally
 
@@ -23,6 +23,10 @@ DATABASE_URL="postgresql://..."          # Neon direct connection, used for migr
 DATABASE_URL_POOLED="postgresql://..."   # Neon pooled connection, used by the app
 STRIPE_SECRET_KEY="sk_test_..."          # Stripe test mode only — live keys are refused
 STRIPE_WEBHOOK_SECRET="whsec_..."        # optional locally; required in production
+BETTER_AUTH_SECRET="..."                 # any long random string, e.g. `openssl rand -base64 32`
+BETTER_AUTH_URL="http://localhost:3000"
+GITHUB_CLIENT_ID="..."                   # from a GitHub OAuth app with callback
+GITHUB_CLIENT_SECRET="..."               # http://localhost:3000/api/auth/callback/github
 ```
 
 Locally, orders are confirmed by the checkout return page, so the webhook secret is optional. To test the

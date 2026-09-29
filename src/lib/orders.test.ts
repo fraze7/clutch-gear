@@ -44,7 +44,7 @@ vi.mock("@/lib/db", () => ({
 const revalidateTag = vi.fn();
 vi.mock("next/cache", () => ({ revalidateTag: (...args: unknown[]) => revalidateTag(...args) }));
 
-const { fulfilCheckoutSession, expireCheckoutSession } = await import("./orders");
+const { fulfilCheckoutSession, expireCheckoutSession, canViewOrder } = await import("./orders");
 
 const session = (overrides: Partial<Stripe.Checkout.Session> = {}) =>
   ({
@@ -120,5 +120,18 @@ describe("expireCheckoutSession", () => {
     orders.get("order1")!.status = "PAID";
     await expireCheckoutSession(session({ status: "expired", payment_status: "unpaid" }));
     expect(orders.get("order1")?.status).toBe("PAID");
+  });
+});
+
+describe("canViewOrder", () => {
+  it("keeps signed-in customers' orders private to them", () => {
+    expect(canViewOrder({ userId: "user-a" }, "user-a")).toBe(true);
+    expect(canViewOrder({ userId: "user-a" }, "user-b")).toBe(false);
+    expect(canViewOrder({ userId: "user-a" }, undefined)).toBe(false);
+  });
+
+  it("lets anyone with the link see a guest order", () => {
+    expect(canViewOrder({ userId: null }, undefined)).toBe(true);
+    expect(canViewOrder({ userId: null }, "user-b")).toBe(true);
   });
 });

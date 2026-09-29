@@ -56,6 +56,12 @@ describe("buildCheckoutSessionParams", () => {
     expect(params.expires_at).toBe(now / 1000 + CHECKOUT_EXPIRY_SECONDS);
   });
 
+  it("pre-fills the email only for signed-in customers", () => {
+    expect(params).not.toHaveProperty("customer_email");
+    const signedIn = buildCheckoutSessionParams({ orderId: "o", lines: [line("x", 100, 1)], shippingCents: 0, origin: "https://x", customerEmail: "me@example.com" });
+    expect(signedIn.customer_email).toBe("me@example.com");
+  });
+
   it("labels free delivery", () => {
     const free = buildCheckoutSessionParams({ orderId: "o", lines: [line("x", 6000, 1)], shippingCents: 0, origin: "https://x" });
     expect(free.shipping_options?.[0].shipping_rate_data?.display_name).toBe("Free UK delivery");

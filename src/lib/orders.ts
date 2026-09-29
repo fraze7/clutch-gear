@@ -4,9 +4,15 @@ import { revalidateTag } from "next/cache";
 import { db } from "@/lib/db";
 import { toOrderItems, type PurchasableLine } from "@/lib/checkout";
 
-export async function createPendingOrder(args: { lines: PurchasableLine[]; subtotalCents: number; shippingCents: number }) {
+export async function createPendingOrder(args: {
+  lines: PurchasableLine[];
+  subtotalCents: number;
+  shippingCents: number;
+  userId?: string;
+}) {
   return db.order.create({
     data: {
+      userId: args.userId,
       subtotalCents: args.subtotalCents,
       shippingCents: args.shippingCents,
       totalCents: args.subtotalCents + args.shippingCents,
@@ -80,6 +86,20 @@ export async function expireCheckoutSession(session: Stripe.Checkout.Session) {
     where: { id: orderId, stripeSessionId: session.id, status: "PENDING" },
     data: { status: "EXPIRED" },
   });
+}
+
+// A signed-in customer's orders, newest first. Pending checkouts they abandoned are left out.
+export function getOrdersForUser(userId: string) {
+  return db.order.findMany({
+    where: { userId, status: { in: ["PAID", "EXPIRED"] } },
+    orderBy: { createdAt: "desc" },
+    include: { items: { select: { productName: true, quantity: true }, orderBy: { productName: "asc" } } },
+  });
+}
+
+// Orders placed while signed in are private to that account; guest orders are found by their unguessable id
+export function canViewOrder(order: { userId: string | null }, viewerId: string | undefined) {
+  return order.userId === null || order.userId === viewerId;
 }
 
 export function getOrder(id: string) {
