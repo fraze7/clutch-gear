@@ -44,6 +44,9 @@ enum OrderStatus {
 model Order {
   id              String      @id @default(cuid())
   status          OrderStatus @default(PENDING)
+  // Set when a signed-in customer checks out; guest orders have no user
+  userId          String?
+  user            User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
   stripeSessionId String?     @unique
   email           String?
   shippingName    String?
@@ -58,6 +61,7 @@ model Order {
   items           OrderItem[]
 
   @@index([status])
+  @@index([userId])
 }
 
 // A copy of each product's name and price at the time of purchase, so editing or deleting
@@ -74,4 +78,66 @@ model OrderItem {
   quantity       Int
 
   @@index([orderId])
+}
+
+// ── Better Auth ──────────────────────────────────────────────────────────────
+// Core tables from Better Auth's documented schema (https://www.better-auth.com/docs/concepts/database)
+
+model User {
+  id            String    @id
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  // "customer" or "admin". Better Auth is configured with input: false, so users can never set it themselves
+  role          String    @default("customer")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+  orders        Order[]
+}
+
+model Session {
+  id        String   @id
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Account {
+  id                    String    @id
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
 }

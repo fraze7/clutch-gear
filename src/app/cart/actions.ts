@@ -18,6 +18,7 @@ import {
 import { buildCheckoutSessionParams, purchasableLines } from "@/lib/checkout";
 import { createPendingOrder } from "@/lib/orders";
 import { getStripe } from "@/lib/stripe";
+import { getSession } from "@/lib/session";
 
 export type AddToCartState =
   | { status: "idle" }
@@ -89,21 +90,24 @@ export async function checkoutAction() {
   const lines = purchasableLines(summary.lines);
   if (lines.length === 0) redirect("/cart");
 
+  const session = await getSession(); // optional: guests can check out too
   const order = await createPendingOrder({
     lines,
     subtotalCents: summary.subtotalCents,
     shippingCents: summary.shippingCents,
+    userId: session?.user.id,
   });
-  const session = await getStripe().checkout.sessions.create(
+  const checkout = await getStripe().checkout.sessions.create(
     buildCheckoutSessionParams({
       orderId: order.id,
       lines,
       shippingCents: summary.shippingCents,
       origin: await siteOrigin(),
+      customerEmail: session?.user.email,
     })
   );
-  await db.order.update({ where: { id: order.id }, data: { stripeSessionId: session.id } });
+  await db.order.update({ where: { id: order.id }, data: { stripeSessionId: checkout.id } });
 
-  if (!session.url) throw new Error("Stripe didn't return a checkout URL");
-  redirect(session.url);
+  if (!checkout.url) throw new Error("Stripe didn't return a checkout URL");
+  redirect(checkout.url);
 }

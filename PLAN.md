@@ -9,16 +9,17 @@ user accounts, payments, an admin area, and automated checks on every push.
 - Next.js 16 (App Router) + TypeScript
 - Tailwind CSS
 - PostgreSQL (hosted on Neon, free tier) + Prisma
-- Auth.js — sign in with GitHub
+- Better Auth — sign in with GitHub (switched from Auth.js in step 6: Auth.js is now part of Better Auth,
+  which its README recommends for new projects; Auth.js v5 was still in beta)
 - Stripe Checkout in test mode (test card numbers, no real money)
 - Vitest + React Testing Library, GitHub Actions to run lint/tests/build on every push
 - Vercel for hosting
 
 ## Data Model
-- **User** — from Auth.js; `role` = customer | admin
+- **User**, **Session**, **Account**, **Verification** — Better Auth's core tables; User has `role` = customer | admin
 - **Product** — slug, name, tagline, description, category, price (pence), stock, image, featured, specs (JSON)
 - **Category** — enum: mice, keyboards, headsets, mousepads, accessories
-- **Order** — status (PENDING → PAID, or EXPIRED), totals (pence), Stripe session id, email, shipping name/address. User link comes in step 6
+- **Order** — status (PENDING → PAID, or EXPIRED), totals (pence), Stripe session id, email, shipping name/address, optional user (guest checkout still works)
 - **OrderItem** — product, quantity, and a copy of the name and price at time of purchase
   (so old orders don't change if a product is edited later)
 
@@ -35,6 +36,10 @@ user accounts, payments, an admin area, and automated checks on every push.
   amount and currency match the order, then marks it PAID and decrements stock in one transaction
   (never below 0). Stripe may retry webhooks, so fulfilling twice is a no-op
 - The Stripe client refuses to start with a live key — this demo can never take real money
+- Accounts: guest checkout stays; signed-in checkouts are linked to the user (email pre-filled on Stripe).
+  Orders placed while signed in are only viewable by that user; guest orders by their unguessable id.
+  `role` has input: false in Better Auth, so users can never make themselves admin. Sign-in/out are
+  Server Actions (nextCookies plugin); "return to" paths are restricted to this site (no open redirects)
 - Unknown order ids render the not-found page but with status 200 (the page is already streaming by then);
   harmless for a private, noindex page
 - Orders are only marked paid by Stripe's webhook, not by the "thanks" page the buyer lands on
@@ -50,7 +55,7 @@ user accounts, payments, an admin area, and automated checks on every push.
 3. ✅ Catalogue: home page, product list with category filter/search/sort, product pages
 4. ✅ Cart: add/remove/change quantity, stored in a cookie, cart page with delivery and stock checks
 5. ✅ Checkout: Stripe Checkout (hosted page), signed webhook marks orders paid and takes stock, order page
-6. Accounts: sign in with GitHub, order history page
+6. ✅ Accounts: sign in with GitHub (Better Auth), account page with order history, private orders
 7. Admin: product create/edit/delete, orders list (admin role only)
 8. Tests + GitHub Actions — started in step 3 (CI runs lint, typecheck, tests); added alongside each step
 9. Deploy to Vercel, README with screenshots
@@ -65,7 +70,7 @@ user accounts, payments, an admin area, and automated checks on every push.
 - GitHub repo `clutch-gear` — before the first push
 - Neon — before step 2
 - Stripe (test mode only) — before step 5
-- GitHub OAuth app — before step 6
+- GitHub OAuth apps (local + production) — before step 6
 - Vercel — already have one
 
 ## Key Notes
@@ -78,7 +83,9 @@ user accounts, payments, an admin area, and automated checks on every push.
 - Migrations are applied by hand with `npm run db:migrate` (local and production share one Neon DB for now);
   a separate production branch in Neon would be worth adding before real traffic
 - Env vars: DATABASE_URL, DATABASE_URL_POOLED, STRIPE_SECRET_KEY (sk_test_ only), STRIPE_WEBHOOK_SECRET
-  (from the Stripe webhook endpoint), optional SITE_URL (defaults to the request's origin)
+  (from the Stripe webhook endpoint), BETTER_AUTH_SECRET (random, different per environment),
+  BETTER_AUTH_URL (site URL), GITHUB_CLIENT_ID / GITHUB_CLIENT_SECRET (one GitHub OAuth app per
+  environment — OAuth apps allow a single callback URL), optional SITE_URL (defaults to the request's origin)
 - CI doesn't run `next build`: it prerenders from the database, so the build runs on Vercel (which has the secrets)
 - Testing in the in-app browser: when the pane is hidden, animation frames pause, so streamed <Suspense>
   content isn't revealed/hydrated until a screenshot or real interaction. Not a bug in the site

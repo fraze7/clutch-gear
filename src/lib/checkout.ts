@@ -26,11 +26,14 @@ export function buildCheckoutSessionParams(args: {
   lines: PurchasableLine[];
   shippingCents: number;
   origin: string;
+  customerEmail?: string;
   now?: number;
 }): Stripe.Checkout.SessionCreateParams {
-  const { orderId, lines, shippingCents, origin, now = Date.now() } = args;
+  const { orderId, lines, shippingCents, origin, customerEmail, now = Date.now() } = args;
   return {
     mode: "payment",
+    // Pre-fills the email for signed-in customers
+    ...(customerEmail ? { customer_email: customerEmail } : {}),
     client_reference_id: orderId,
     metadata: { orderId },
     line_items: lines.map((line) => ({
