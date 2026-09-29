@@ -84,8 +84,14 @@ sequenceDiagram
 | **Cart** — live prices, free delivery over £50 | **Order confirmation** — after a Stripe test payment |
 | ![Admin overview](docs/screenshots/admin-overview.png) | ![Admin products](docs/screenshots/admin-products.png) |
 | **Admin overview** | **Admin products** |
-| ![Admin product form](docs/screenshots/admin-edit.png) | ![Mobile product page](docs/screenshots/mobile-product.png) |
-| **Admin product editor** | **Mobile** |
+
+**Admin product editor** — validation, image picker and specs
+
+![Admin product editor](docs/screenshots/admin-edit.png)
+
+**On mobile**
+
+<img src="docs/screenshots/mobile-product.png" alt="Product page on a phone" width="320">
 
 ## Tech stack
 
