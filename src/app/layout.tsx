@@ -15,6 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  // Makes the link-preview image URL absolute
+  metadataBase: new URL(process.env.SITE_URL ?? "https://clutch-gear.vercel.app"),
   title: { default: "Clutch Gear — gaming mice, keyboards & headsets", template: "%s | Clutch Gear" },
   description: "Gear for the clutch moments. A portfolio demo store for a made-up gaming gear brand.",
 };

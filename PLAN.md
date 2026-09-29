@@ -62,12 +62,14 @@ user accounts, payments, an admin area, and automated checks on every push.
 5. ✅ Checkout: Stripe Checkout (hosted page), signed webhook marks orders paid and takes stock, order page
 6. ✅ Accounts: sign in with GitHub (Better Auth), account page with order history, private orders
 7. ✅ Admin: overview stats, product create/edit/delete with validation, orders list with status filter (admin role only)
-8. Tests + GitHub Actions — started in step 3 (CI runs lint, typecheck, tests); added alongside each step
-9. Deploy to Vercel, README with screenshots
+8. ✅ Tests + GitHub Actions — 96 tests; CI runs lint, typecheck and tests on every push and PR
+9. ✅ Deployed to Vercel (https://clutch-gear.vercel.app); README with screenshots, checkout diagram and design decisions;
+   brand icon, link-preview image and error page
 
 ## Stretch Goals (after it's finished)
+- Separate production database branch in Neon
+- End-to-end browser tests (Playwright) for checkout
 - Product reviews and ratings
-- Stock checks at checkout
 - Product image uploads in admin
 - Order confirmation emails
 
